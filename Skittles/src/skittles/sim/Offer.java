@@ -70,7 +70,7 @@ public class Offer
 		return intPickedByIndex;
 	}
 	
-	protected void setPickedByIndex( int intPickedByIndex )
+	public void setPickedByIndex( int intPickedByIndex )
 	{
 		this.intPickedByIndex = intPickedByIndex;
 	}
