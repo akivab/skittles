@@ -1,7 +1,5 @@
 package skittles.manualplayer;
 
-import java.util.Scanner;
-
 import skittles.sim.Game;
 import skittles.sim.Offer;
 import skittles.sim.Player;
@@ -26,7 +24,7 @@ public class ManualP extends Player
 	}
 	
 	@Override
-	public void initialize( int intPlayerIndex, String strClassName, int[] aintInHand ) 
+	public void initialize(int players, int intPlayerIndex, String strClassName, int[] aintInHand)
 	{
 		this.intPlayerIndex = intPlayerIndex;
 		this.strClassName = strClassName;
@@ -81,16 +79,11 @@ public class ManualP extends Player
 	}
 	
 	@Override
-	public void syncInHand(int[] aintInHand) 
-	{
-		// TODO Auto-generated method stub
-		
-	}
+	public void syncInHand(int[] aintInHand) {}
 
 	@Override
 	public void happier(double dblHappinessUp) 
 	{
-		// TODO Auto-generated method stub
 		dblHappiness += dblHappinessUp;
 		System.out.println( "You eat, and you are happier by: " + dblHappinessUp );
 		System.out.println();
@@ -140,22 +133,16 @@ public class ManualP extends Player
 	}
 
 	@Override
-	public void updateOfferExe(Offer[] aoffCurrentOffers) {
-		// TODO Auto-generated method stub
-		
-	}
-
+	public void updateOfferExe(Offer[] aoffCurrentOffers) {}
 	@Override
 	public String getClassName() 
 	{
-		// TODO Auto-generated method stub
 		return strClassName;
 	}
 
 	@Override
 	public int getPlayerIndex() 
 	{
-		// TODO Auto-generated method stub
 		return intPlayerIndex;
 	}	
 }

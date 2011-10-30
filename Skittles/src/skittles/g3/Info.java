@@ -13,11 +13,13 @@ public class Info {
 
 	public final int colors;
 	public final int players;
-
-	private int myId;
+	public final int myId;
 
 	private Vector <int[][]> give;
 	private Vector <int[][]> take;
+
+	private double[] taste;
+	private boolean[] tasted;
 
 	public Info(int players, int myId, int[] hand)
 	{
@@ -40,6 +42,11 @@ public class Info {
 		/* Initialize love and hate */
 		give = new Vector <int[][]> ();
 		take = new Vector <int[][]> ();
+		/* Initialize taste and tasted */
+		taste = new double [colors];
+		tasted = new boolean [colors];
+		for (int i = 0 ; i != colors ; ++i)
+			tasted[i] = false;
 	}
 
 	public void updateOffers(Offer[] offers)
@@ -126,7 +133,20 @@ public class Info {
 					max = j;
 			swap(index, max, i);
 		}
-		return index;
+		int[] rank = new int [colors];
+		for (int i = 0 ; i != colors ; ++i)
+			rank[index[i]] = i;
+		return rank;
+	}
+
+	public boolean canTrade(int[] wanted, int player)
+	{
+		int unknown = 0;
+		int[] hand = profile[player];
+		for (int i = 0 ; i != colors ; ++i)
+			if (wanted[i] > hand[i])
+				unknown += wanted[i] - hand[i];
+		return unknown <= profile[player][colors];
 	}
 
 	public Offer getOffer(int turn, int player)
@@ -144,14 +164,35 @@ public class Info {
 		return copy(profile[player], colors);
 	}
 
-	public void updateEaten(int color, int howMany)
+	public void updateEaten(int color, int howMany, double happyChange)
 	{
+		/* Update your hand */
 		profile[myId][color] -= howMany;
+		/* Update tastes array */
+		if (!tasted[color]) {
+			/* If negative it is linear */
+			if (happyChange < 0.0)
+				taste[color] = happyChange / howMany;
+			/* If positive it is squared */
+			else
+				taste[color] = happyChange / (howMany * howMany);
+			tasted[color] = true;
+		}
 	}
 
 	public int turns()
 	{
 		return offers.size();
+	}
+
+	public boolean tasted(int color)
+	{
+		return tasted[color];
+	}
+
+	public double taste(int color)
+	{
+		return !tasted[color] ? 0.0 : taste[color];
 	}
 
 	/* Helper function */

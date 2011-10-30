@@ -1,7 +1,5 @@
 package skittles.sim;
 
-import java.util.ArrayList;
-
 public class Offer 
 {
 	private int[] aintOffer;

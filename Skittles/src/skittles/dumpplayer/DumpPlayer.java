@@ -9,11 +9,11 @@ public class DumpPlayer extends Player
 	double dblHappiness;
 	String strClassName;
 	int intPlayerIndex;
-	
+
 	private double[] adblTastes;
 	private int intLastEatIndex;
 	private int intLastEatNum;
-	
+
 //	public DumpPlayer( int[] aintInHand )
 //	{
 //		this.aintInHand = aintInHand;
@@ -39,7 +39,7 @@ public class DumpPlayer extends Player
 		intLastEatIndex = intMaxColorIndex;
 		intLastEatNum = intMaxColorNum;
 	}
-	
+
 	@Override
 	public void offer( Offer offTemp )
 	{
@@ -74,7 +74,7 @@ public class DumpPlayer extends Player
 	public void syncInHand(int[] aintInHand) 
 	{
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -137,7 +137,7 @@ public class DumpPlayer extends Player
 	}
 
 	@Override
-	public void initialize(int intPlayerIndex, String strClassName,	int[] aintInHand) 
+	public void initialize(int players, int intPlayerIndex, String strClassName,	int[] aintInHand) 
 	{
 		this.intPlayerIndex = intPlayerIndex;
 		this.strClassName = strClassName;
@@ -150,7 +150,7 @@ public class DumpPlayer extends Player
 			adblTastes[ intColorIndex ] = -1;
 		}
 	}
-	
+
 	private boolean checkEnoughInHand( int[] aintTryToUse )
 	{
 		for ( int intColorIndex = 0; intColorIndex < intColorNum; intColorIndex ++ )

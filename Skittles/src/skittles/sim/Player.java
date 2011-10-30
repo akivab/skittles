@@ -9,7 +9,7 @@ public abstract class Player
 	public abstract Offer pickOffer(Offer[] aoffCurrentOffers);
 	public abstract void offerExecuted(Offer offPicked);
 	public abstract void updateOfferExe(Offer[] aoffCurrentOffers);
-	public abstract void initialize(int intPlayerIndex, String strClassName, int[] aintInHand);
+	public abstract void initialize(int players, int intPlayerIndex, String strClassName, int[] aintInHand);
 	public abstract String getClassName();
 	public abstract int getPlayerIndex();
 }

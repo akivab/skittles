@@ -13,8 +13,6 @@ import org.w3c.dom.NodeList;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
-import skittles.manualplayer.ManualP;
-
 public class Game 
 {
 	private Player[] aplyPlayers;
@@ -133,9 +131,9 @@ public class Game
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				plyNew.initialize( i, strPlayerClass, aintInHand.clone() );
+				plyNew.initialize(ndlPlayers.getLength(), i, strPlayerClass, aintInHand.clone() );
 				alPlayers.add( plyNew );
-				PlayerStatus plsTemp = new PlayerStatus( i, strPlayerClass, aintInHand.clone(), adblTastes.clone() );
+				PlayerStatus plsTemp = new PlayerStatus(i, strPlayerClass, aintInHand.clone(), adblTastes.clone());
 				alPlayerStatus.add( plsTemp );
 			}
 		}
