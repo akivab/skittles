@@ -27,6 +27,7 @@ public class Info {
 		this.players = players;
 		this.myId = myId;
 		profile = new int [players][colors + 1];
+		offers = new Vector <Offer[]> ();
 		/* Total number of skittles per player */
 		int skittles = sum(hand);
 		/* Everyone else's profiles */
@@ -36,7 +37,7 @@ public class Info {
 			profile[i][colors] = skittles;
 		}
 		/* Your own hand */
-		for (int i = 0 ; i != players ; ++i)
+		for (int i = 0 ; i != colors ; ++i)
 			profile[myId][i] = hand[i];
 		profile[myId][colors] = 0;
 		/* Initialize love and hate */
@@ -47,16 +48,21 @@ public class Info {
 		tasted = new boolean [colors];
 		for (int i = 0 ; i != colors ; ++i)
 			tasted[i] = false;
+//		System.out.println("Hand of " + myId + ": " + Arrays.toString(hand));
 	}
 
 	public void updateOffers(Offer[] offers)
 	{
 		/* Update the profiles */
-		for (Offer o : offers) {
-			refineProfile(o.getOfferedByIndex(), o.getOffer());
-			if (!o.getOfferLive()) {
-				refineProfile(o.getPickedByIndex(), o.getDesire());
-				transferBetweenProfiles(o);
+		for (Offer offer : offers) {
+			int from = offer.getOfferedByIndex();
+			int to = offer.getPickedByIndex();
+//			System.out.println(from + " --> " + to);
+			if (!offer.getOfferLive() && from != to && to >= 0 && to < players) {
+				refineProfile(from, offer.getOffer());
+//				System.out.println("Transfered!");
+				refineProfile(to, offer.getDesire());
+				transferBetweenProfiles(offer);
 			}
 		}
 		/* Update the offer bookkeeping */
@@ -78,16 +84,18 @@ public class Info {
 				giveNow[from][i] = offer[i];
 				takeNow[from][i] = desire[i];
 			}
-			if (o.getOfferLive())
-				continue;
 			int to = o.getPickedByIndex();
-			for (int i = 0 ; i != colors ; ++i) {
-				giveNow[to][i] += desire[i];
-				takeNow[to][i] += offer[i];
-			}
+			if (!o.getOfferLive() && to != from && to >= 0 && to < players)
+				for (int i = 0 ; i != colors ; ++i) {
+					giveNow[to][i] += desire[i];
+					takeNow[to][i] += offer[i];
+				}
 		}
 		give.add(giveNow);
 		take.add(takeNow);
+//		System.out.println("Profiles by " + myId);
+//		for (int i = 0 ; i != players ; ++i)
+//			System.out.println("Profile " + i + ": " + Arrays.toString(profile[i]) + " " + (i == myId ? "[me]" : ""));
 	}
 
 	public double[] preferences(int player)
@@ -96,19 +104,21 @@ public class Info {
 		int takeSum[] = new int [colors];
 		for (int i = 0 ; i != colors ; ++i)
 			giveSum[i] = takeSum[i] = 0;
-		for (int turn = 0 ; turn != give.size() ; ++turn) {
+		int turns = give.size();
+		for (int turn = 0 ; turn != turns ; ++turn) {
 			int[] giveNow = give.get(turn)[player];
-			int[] takeNow = give.get(turn)[player];
+			int[] takeNow = take.get(turn)[player];
 			for (int i = 0 ; i != colors ; ++i) {
 				giveSum[i] += giveNow[i];
 				takeSum[i] += takeNow[i];
 			}
 		}
 		double[] pref = new double [colors];
-		double giveMax = (double) max(giveSum);
-		double takeMax = (double) max(takeSum);
+		double giveMax = turns > 0 ? (double) max(giveSum) : 1.0;
+		double takeMax = turns > 0 ? (double) max(takeSum) : 1.0;
 		for (int i = 0 ; i != colors ; ++i)
 			pref[i] = giveSum[i] / giveMax - takeSum[i] / takeMax;
+//		System.out.println("Preferences of " + player + ": " + Arrays.toString(pref));
 		return pref;
 	}
 
@@ -151,7 +161,8 @@ public class Info {
 
 	public Offer getOffer(int turn, int player)
 	{
-		return copy(offers.get(turn)[player]);
+		Offer offer = offers.get(turn)[player];
+		return offer == null ? null : copy(offer);
 	}
 
 	public int[] hand()
@@ -178,6 +189,10 @@ public class Info {
 				taste[color] = happyChange / (howMany * howMany);
 			tasted[color] = true;
 		}
+//		System.out.print("Taste: [" + (!tasted[0] ? "?" : taste[0]));
+//		for (int i = 1 ; i != colors ; ++i)
+//			System.out.print(", " + (!tasted[i] ? "?" : taste[i]));
+//		System.out.println("]");
 	}
 
 	public int turns()
@@ -200,23 +215,26 @@ public class Info {
 	/* Update the profile by offer */
 	private void refineProfile(int id, int[] vector)
 	{
+//		System.out.println("Profile: " + Arrays.toString(profile[id]));
+//		System.out.println("Vector: " + Arrays.toString(vector));
 		for (int i = 0 ; i != colors ; ++i)
 			if (vector[i] > profile[id][i]) {
 				profile[id][colors] -= vector[i] - profile[id][i];
 				profile[id][i] = vector[i];
 			}
+//		System.out.println("Profile: " + Arrays.toString(profile[id]));
 	}
 
 	/* Tranfer skittles */
-	private void transferBetweenProfiles(Offer o)
+	private void transferBetweenProfiles(Offer offer)
 	{
-		int from = o.getOfferedByIndex();
-		int[] offered = o.getOffer();
-		int to = o.getPickedByIndex();
-		int[] desire = o.getDesire();
+		int from = offer.getOfferedByIndex();
+		int[] offered = offer.getOffer();
+		int to = offer.getPickedByIndex();
+		int[] desire = offer.getDesire();
 		for (int i = 0 ; i != colors ; ++i) {
-			profile[from][i] += offered[i] - desire[i];
-			profile[to][i] += desire[i] - offered[i];
+			profile[from][i] += desire[i] - offered[i];
+			profile[to][i] += offered[i] - desire[i];
 		}
 	}
 

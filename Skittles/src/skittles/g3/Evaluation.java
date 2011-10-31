@@ -55,6 +55,7 @@ public class Evaluation {
 					res += (toTake[color] - toGive[color]) * val * val;
 			}
 		}
+//		System.out.println("Market value: " + res);
 		return res;
 	}
 
@@ -65,8 +66,10 @@ public class Evaluation {
 	 */
 	public double selfEvaluation(int[] toTake, int[] toGive)
 	{
-		return 0.5 * selfGreedyEvaluation(toTake, toGive) +
-		       0.5 * selfLinearEvaluation(toTake, toGive);
+		double val = 0.5 * selfGreedyEvaluation(toTake, toGive) +
+		             0.5 * selfLinearEvaluation(toTake, toGive);
+//		System.out.println("Self value: " + val);
+		return val;
 	}
 
 	/* Evaluate an offer for yourself

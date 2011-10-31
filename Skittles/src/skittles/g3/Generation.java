@@ -15,30 +15,37 @@ public class Generation {
 
 	private int medianOfferSize;
 
-	public Generation(Info info)
+	private int inHand;
+
+	public Generation(Info info, Random random)
 	{
 		this.info = info;
-		random = new Random();
+		this.random = random;
 		this.previousTurns = -1;
 	}
 
-	/* This is the only function of this class */
+	/* This is the only function of this class
+	 * Generate a new offer and return it
+	 */
 	public Offer generateOffer()
 	{
 		/* Re-initialize generator */
 		if (info.turns() != previousTurns) {
 			previousTurns = info.turns();
-			medianOfferSize = medianOfferSize();
+			inHand = sum(info.hand());
+			if (inHand != 0)
+				medianOfferSize = medianOfferSize();
 		}
-		/* Find out the offer size using
-		 * a Gaussian distribution around
-		 * the median size and standard
-		 * deviation of 3
-		 */
-		int offerSize = generateOfferSize();
-		/* Create the desire array */
-		int[] toTake = generateOfferTake(offerSize);
-		int[] toGive = generateOfferGive(toTake);
+		if (inHand == 0)
+			return new Offer(info.myId, info.colors);
+		int[] toGive, toTake;
+		do {
+			/* Find out the offer size using */
+			int offerSize = generateOfferSize();
+			/* Create the desire array */
+			toTake = generateOfferTake(offerSize);
+			toGive = generateOfferGive(toTake);
+		} while (toGive == null);
 		/* Create the offer and return it */
 		Offer offer = new Offer(info.myId, info.colors);
 		offer.setOffer(toGive, toTake);
@@ -84,6 +91,9 @@ public class Generation {
 
 	/* Get the matching offer for the randomly
 	 * created desire given by above method
+	 * Does not pick from colors that are
+	 * in the desire array and always checks
+	 * that the player has the colors in hand
 	 */
 	private int[] generateOfferGive(int[] toTake)
 	{
@@ -94,16 +104,16 @@ public class Generation {
 			toGive[i] = 0;
 		/* Count colors that are not in the
 		 * desire array and you still have
-		 * so skittles of them
+		 * skittles of them
 		 */
 		int nonUsed = 0;
 		for (int i = 0 ; i != info.colors ; ++i)
-			if (hand[i] > 0 && toGive[i] == 0)
+			if (hand[i] > 0 && toTake[i] == 0)
 				nonUsed++;
 		/* Create the initial array of weights */
 		double[] weight = new double [info.colors];
 		for (int i = 0 ; i != info.colors ; ++i)
-			if (hand[i] > 0 && toGive[i] == 0)
+			if (hand[i] > 0 && toTake[i] == 0)
 				weight[i] = 1.0 / nonUsed;
 			else
 				weight[i] = 0.0;
@@ -111,9 +121,11 @@ public class Generation {
 		 * you pick a color you make it more
 		 * probable that it will be chosen again
 		 */
-		int desireSize = sum(toGive);
+		int desireSize = sum(toTake);
 		for (int i = 0 ; i != desireSize ; ++i) {
 			int picked = randomPickUsingWeights(weight);
+			if (picked == -1)
+				return null;
 			/* If you have no more in hand */
 			if (++toGive[picked] == hand[picked])
 				/* This color cannot be picked
@@ -129,7 +141,7 @@ public class Generation {
 	}
 
 	/* Get median of offer sizes so far
-	 * Returns 1 if no offers
+	 * Returns 1 if no offers made
 	 */
 	private int medianOfferSize()
 	{
@@ -146,13 +158,19 @@ public class Generation {
 		return offerCount == 0 ? 1 : offerSizes[offerCount / 2];
 	}
 
-	/* Get an offer size around the middle given size */
+	/* Get an offer size around the median
+	 * set size using a Gaussian distribution
+	 * with a standard deviation of 3
+	 */
 	private int generateOfferSize()
 	{
 		int size;
+		int medianUsed = medianOfferSize;
+		if (medianUsed > inHand)
+			medianUsed = inHand;
 		do {
-			size = (int) (random.nextDouble() * 3.0 + medianOfferSize);
-		} while (size <= 0);
+			size = (int) (random.nextDouble() * 3.0 + medianUsed);
+		} while (size <= 0 || size > inHand);
 		return size;
 	}
 	

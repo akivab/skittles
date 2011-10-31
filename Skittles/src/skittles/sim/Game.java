@@ -192,7 +192,6 @@ public class Game
 	public void runGame()
 	{
 		// check whether there is still at least one player has more skittles to eat
-		
 		while ( !checkFinish() )
 		{
 			showEveryInHand();			
