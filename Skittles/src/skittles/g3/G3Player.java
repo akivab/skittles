@@ -43,6 +43,7 @@ public class G3Player extends skittles.sim.Player
 	/* How many of the color last eaten */
 	private int howManyEaten;
 
+	/* Initialize stuff */
 	public void initialize(int players, int myId, String name, int[] hand)
 	{
 		info = new Info(players, myId, hand);
@@ -56,10 +57,9 @@ public class G3Player extends skittles.sim.Player
 		evaluation = new Evaluation(info);
 	}
 
-	/* Simple version of offer function
-	 * Offer as many as you can from
-	 * the worst of your colors and
-	 * ask for the best of your colors
+	/* Generate offers randomly
+	 * Then pick the one with
+	 * the best evaluation
 	 */
 	public void offer(Offer returnedOffer)
 	{
