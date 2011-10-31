@@ -23,6 +23,7 @@ public class Info {
 
 	public Info(int players, int myId, int[] hand)
 	{
+		offers = new Vector<Offer[]>();
 		colors = hand.length;
 		this.players = players;
 		this.myId = myId;
@@ -36,7 +37,7 @@ public class Info {
 			profile[i][colors] = skittles;
 		}
 		/* Your own hand */
-		for (int i = 0 ; i != players ; ++i)
+		for (int i = 0 ; i != colors ; ++i)
 			profile[myId][i] = hand[i];
 		profile[myId][colors] = 0;
 		/* Initialize love and hate */
@@ -157,6 +158,10 @@ public class Info {
 	public int[] hand()
 	{
 		return copy(profile[myId], colors);
+	}
+	
+	public int howManyWeHave(int color){
+		return profile[myId][color];
 	}
 
 	public int[] profile(int player)

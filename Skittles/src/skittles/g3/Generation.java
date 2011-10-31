@@ -111,7 +111,7 @@ public class Generation {
 		 * you pick a color you make it more
 		 * probable that it will be chosen again
 		 */
-		int desireSize = sum(toGive);
+		int desireSize = sum(toTake);
 		for (int i = 0 ; i != desireSize ; ++i) {
 			int picked = randomPickUsingWeights(weight);
 			/* If you have no more in hand */

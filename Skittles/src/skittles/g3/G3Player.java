@@ -32,7 +32,13 @@ public class G3Player extends skittles.sim.Player
 	 * the worst of your colors and
 	 * ask for the best of your colors
 	 */
-	public void offer(Offer bestOffer)
+	public void offer(Offer bestOffer){
+		int[] aintOffer= new int [info.colors];
+		int[] aintDesire = new int [info.colors];
+		
+		bestOffer.setOffer(aintOffer, aintDesire);
+	}
+	public void offer_test(Offer bestOffer)
 	{
 		double bestValue = Double.MIN_VALUE;
 		long startingTime = System.currentTimeMillis();
@@ -100,9 +106,9 @@ public class G3Player extends skittles.sim.Player
 	 */
 	private void eat()
 	{
-		/* Try something you haven't tasted */
+		/* Try something you haven't tasted IF ITS AVAILABLE */
 		for (int i = 0 ; i != info.colors ; ++i)
-			if (!info.tasted(i)) {
+			if (!info.tasted(i) && info.howManyWeHave(i)>0) {
 				colorEaten = i;
 				howManyEaten = 1;
 				return;
