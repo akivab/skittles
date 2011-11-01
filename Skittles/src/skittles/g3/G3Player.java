@@ -148,6 +148,7 @@ public class G3Player extends skittles.sim.Player
 	private void eat()
 	{
 		int[] hand = info.hand();
+		howManyEaten = 1;
 		/* Try something you haven't tasted */
 		int nonTastedCount = 0;
 		int[] nonTasted = new int [info.colors];
@@ -155,19 +156,30 @@ public class G3Player extends skittles.sim.Player
 			if (!info.tasted(i) && hand[i] > 0)
 				nonTasted[nonTastedCount++] = i;
 		if (nonTastedCount != 0) {
-			howManyEaten = 1;
 			colorEaten = nonTasted[random.nextInt(nonTastedCount)];
 			return;
 		}
-		/* Find closest to 0 taste */
+		/* Find closest to 0 negative taste */
 		colorEaten = -1;
 		for (int i = 0 ; i != info.colors ; ++i)
-			if (info.tasted(i) && hand[i] > 0)
-				if (colorEaten < 0 || Math.abs(info.taste(i)) < Math.abs(info.taste(colorEaten)))
+			if (info.tasted(i) && info.taste(i) < 0.0 && hand[i] > 0)
+				if (colorEaten < 0 || info.taste(i) > info.taste(colorEaten))
 					colorEaten = i;
-		howManyEaten = 1;
-		/* If worst taste is positive eat all */
-		if (info.taste(colorEaten) > 0.0)
+		/* Return if found a negative taste */
+		if (colorEaten >= 0)
+			return;
+		/* Find closest to 0 positive taste */
+		for (int i = 0 ; i != info.colors ; ++i)
+			if (info.tasted(i) && info.taste(i) > 0.0 && hand[i] > 0)
+				if (colorEaten < 0 || info.taste(i) < info.taste(colorEaten))
+					colorEaten = i;
+		/* Count better tastes */
+		int better = 0;
+		for (int i = 0 ; i != info.colors ; ++i)
+			if (info.tasted(i) && info.taste(i) > info.taste(colorEaten))
+				better++;
+		/* If on top 25% eat them all */
+		if (better < info.colors / 4)
 			howManyEaten = hand[colorEaten];
 	}
 

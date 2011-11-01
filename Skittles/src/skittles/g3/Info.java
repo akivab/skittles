@@ -260,8 +260,6 @@ public class Info {
 	/* Copy the offer and override who sent */
 	private static class CopyOffer extends Offer {
 
-		private int to;
-
 		public CopyOffer(int from, int colors)
 		{
 			super(from, colors);
@@ -269,12 +267,7 @@ public class Info {
 
 		public void setPickedByIndex(int id)
 		{
-			to = id;
-		}
-
-		public int getPickedByIndex()
-		{
-			return to;
+			super.setPickedByIndex(id);
 		}
 	}
 
