@@ -159,11 +159,11 @@ public class G3Player extends skittles.sim.Player
 			colorEaten = nonTasted[random.nextInt(nonTastedCount)];
 			return;
 		}
-		/* Find worst taste */
+		/* Find closest to 0 taste */
 		colorEaten = -1;
 		for (int i = 0 ; i != info.colors ; ++i)
 			if (info.tasted(i) && hand[i] > 0)
-				if (colorEaten < 0 || info.taste(i) < info.taste(colorEaten))
+				if (colorEaten < 0 || Math.abs(info.taste(i)) < Math.abs(info.taste(colorEaten)))
 					colorEaten = i;
 		howManyEaten = 1;
 		/* If worst taste is positive eat all */

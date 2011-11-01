@@ -257,14 +257,34 @@ public class Info {
 		return sum;
 	}
 
+	/* Copy the offer and override who sent */
+	private static class CopyOffer extends Offer {
+
+		private int to;
+
+		public CopyOffer(int from, int colors)
+		{
+			super(from, colors);
+		}
+
+		public void setPickedByIndex(int id)
+		{
+			to = id;
+		}
+
+		public int getPickedByIndex()
+		{
+			return to;
+		}
+	}
+
 	/* Copy the offer object */
-	private static Offer copy(Offer o)
+	private static Offer copy(Offer offer)
 	{
-		int colors = o.getOffer().length;
-		Offer copy = new Offer(o.getOfferedByIndex(), colors);
-		copy.setOffer(copy(o.getOffer()), copy(o.getDesire()));
-		if (!o.getOfferLive())
-			copy.setPickedByIndex(o.getPickedByIndex());
+		int colors = offer.getOffer().length;
+		CopyOffer copy = new CopyOffer(offer.getOfferedByIndex(), colors);
+		copy.setOffer(copy(offer.getOffer()), copy(offer.getDesire()));
+		copy.setPickedByIndex(offer.getPickedByIndex());
 		return copy;
 	}
 
