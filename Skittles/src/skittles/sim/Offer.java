@@ -18,6 +18,13 @@ public class Offer
 		blnOfferLive = true;
 	}
 	
+	public Offer(int[] offer, int[] desire, int offeredBy, int pickedBy){
+		this.aintOffer = offer;
+		this.aintDesire = desire;
+		this.intOfferedByIndex = offeredBy;
+		this.intPickedByIndex = pickedBy;
+	}
+	
 	public void setOffer( int[] aintOffer, int[] aintDesire )
 	{
 		int intOfferCount = 0;

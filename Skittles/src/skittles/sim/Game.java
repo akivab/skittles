@@ -19,6 +19,7 @@ public class Game
 	private PlayerStatus[] aplsPlayerStatus;
 	private int intPlayerNum;
 	private int intColorNum;
+	public Visualization viz = new Visualization();
 	
 	private Offer[] aoffCurrentOffers;
 	
@@ -192,12 +193,16 @@ public class Game
 	public void runGame()
 	{
 		// check whether there is still at least one player has more skittles to eat
+		int time = 0;
+		viz.setPlayers(this.aplyPlayers);
 		while ( !checkFinish() )
 		{
 			showEveryInHand();			
 			everyoneEatAndOffer();
+			viz.updateStatuses(time, aplsPlayerStatus);
 			int[] aintOrder = generateRandomOfferPickOrder();			// need code to log the order for repeated game
 			pickOfferInOrder( aintOrder );
+			viz.updateOffers(time++, aoffCurrentOffers);
 			broadcastOfferExcution();
 		}
 		double dblAver = 0;
@@ -211,6 +216,11 @@ public class Game
 			double dblTempHappy = plsTemp.getHappiness() + dblAver;
 			System.out.println( "Player #" + plsTemp.getPlayerIndex() + "'s happiness is: " + dblTempHappy );
 		}
+		viz.generateGraphs();
+		try{
+			viz.generateHTML("/home/akiva/Desktop/output.html");
+		}
+		catch(Exception e){}
 	}
 	
 	private void showEveryInHand() 

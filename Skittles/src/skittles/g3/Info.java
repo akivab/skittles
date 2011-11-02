@@ -130,7 +130,15 @@ public class Info {
 		return rank(dvalue);
 	}
 
-	public static int[] rank(double[] value)
+	public static int[] rank(double[] value){
+		int[] index = index(value);
+		int[] rank = new int [index.length];
+
+		for (int i = 0 ; i != index.length ; ++i)
+			rank[index[i]] = i;
+		return rank;
+	}
+	public static int[] index(double[] value)
 	{
 		int colors = value.length;
 		int[] index = new int [colors];
@@ -143,10 +151,7 @@ public class Info {
 					max = j;
 			swap(index, max, i);
 		}
-		int[] rank = new int [colors];
-		for (int i = 0 ; i != colors ; ++i)
-			rank[index[i]] = i;
-		return rank;
+		return index;
 	}
 
 	public boolean canTrade(int[] wanted, int player)
@@ -249,7 +254,7 @@ public class Info {
 	}
 
 	/* Sum of a list of integers */
-	private static int sum(int ... v)
+	public static int sum(int ... v)
 	{
 		int sum = 0;
 		for (int i = 0 ; i != v.length ; ++i)
@@ -288,7 +293,7 @@ public class Info {
 	}
 
 	/* Copy the whole array */
-	private static int[] copy(int[] arr)
+	public static int[] copy(int[] arr)
 	{
 		return Arrays.copyOf(arr, arr.length);
 	}
