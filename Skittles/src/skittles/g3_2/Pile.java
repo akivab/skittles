@@ -22,6 +22,10 @@ public class Pile {
 			trading.add(color);
 	}
 	
+	public String toString(){
+		return "trade: "+ trading.toString() + ", hoard:" +hoarding.toString();
+	}
+	
 	
 	// get back a list of colors by preference
 	// e.g. if we have colors 1,2,3 in list, and like them in rank 2,3,1, we get back 2,3,1.
