@@ -29,15 +29,10 @@ public class Eater {
 					whichColor = unknown[i];
 			return;
 		}
-		// number of piles we are hoarding
-		// TODO
-		// update using the number of piled
-		int hoardingCount = 2;
-		// sort the array of tastes
-		int[] sortedPreferences = Util.index(info.preference);
-		// search between the non-stacked piles
-		for (int i = hoardingCount ; i != colors ; ++i) {
-			int color = sortedPreferences[i];
+		
+		int[] trading = info.pile.getTradingColorsByPreference();
+		for (int i = 0 ; i != trading.length ; ++i) {
+			int color = trading[i];
 			if (info.hand[color] > 0)
 				// pick the biggest pile
 				if (whichColor < 0 || info.hand[color] > info.hand[whichColor])
@@ -47,8 +42,9 @@ public class Eater {
 		if (whichColor >= 0)
 			return;
 		// pick from stacked piles
-		for (int i = 0 ; i != hoardingCount ; ++i) {
-			int color = sortedPreferences[i];
+		int[] hoarding = info.pile.getHoardingColorsByPreference();
+		for (int i = 0 ; i != hoarding.length ; ++i) {
+			int color = hoarding[i];
 			if (info.hand[color] > 0)
 				// pick the smallest pile
 				if (whichColor < 0 || info.hand[color] < info.hand[whichColor])
