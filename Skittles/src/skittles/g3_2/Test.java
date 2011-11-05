@@ -2,47 +2,68 @@ package skittles.g3_2;
 
 public class Test {
 	public static void main(String[] args){
-		try {
-			new Test();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		Test test = new Test();
+		test.testInfo();
+		System.out.println("Testing OK");
+		test.testInfoEvaluate();
+		System.out.println("Evaluation OK");
+		test.testInfoHoardingCount();
+		System.out.println("Hoarding OK");
 	}
-	public void do_assert(boolean f) throws Exception{
-		if(!f)
-			throw new Exception("Not gonna happen, bubs.");
+	
+	public int numPlayers;
+	public int playerIndex;
+	public int[] smallHand;
+	public int[] bigHand;
+	public Info smallInfo;
+	public Info bigInfo;
+	
+	public Test(){
+		numPlayers = 5;
+		playerIndex = 1;
+		smallHand = new int[]{10,10,10,10,10};
+		bigHand = new int[]{10,10,10,10,10,10,10,10,10,10};
+		
 	}
-	public Test() throws Exception{
-		Info info = new Info(20, 1, "Test", new int[]{2,2,2,2,2});
-		System.out.println("k = " + info.hoardingCount());
-		System.out.println("threshold = " + info.computeThreshold());
-		for(int i : info.hand)
-			do_assert(i == 2);
-		System.out.println("Initialization OK");
-		info.setEating(new int[]{2,0,0,0,0});
-		do_assert(info.hand[0] == 0);
-		for(int i = 1; i < info.hand.length; i++)
-			do_assert(info.hand[i] == 2);
-		System.out.println("Eating OK");
-		info.update(4);
-		do_assert(Math.round(info.preference[0]) == 1);
-		for(int i = 1; i < info.preference.length; i++)
-			do_assert(info.preference[i] == 0.1);
-		System.out.println("Preferences OK");
-		// we have 0, 2, 2, 2, 2 in hand.
-		// we like 1 with certainty 1
-		int[] k1 = new int[info.hand.length];
-		int[] k2 = Util.copy(k1);
-		double b1 = info.evaluate(k1, k1, true);
-		k1[0] = 2;
-		double b2 = info.evaluate(k1, k2, true);
-		System.out.println(b1 + " " + b2);
-		do_assert(Math.round(b2 - b1) == 4);
-		System.out.println("Evaluate works");
-		Eater eat = new Eater(info);
-		int[] eaten = new int[5];
-		eat.decideToEat(eaten);
-		do_assert(eaten[0] == 0);
-		System.out.println("Eating OK");
+	
+	public void testInfo(){
+		smallInfo = new Info(numPlayers, playerIndex, "Test", smallHand);
+		bigInfo = new Info(numPlayers, playerIndex, "Test", bigHand);
+		assert smallInfo.hoardingCount() == 1;
+		assert bigInfo.hoardingCount() == 2;
+		assert smallInfo.pile.trading.size() == 0 && smallInfo.pile.hoarding.size() == 0;
 	}
+	
+	public void testInfoHoardingCount(){
+		smallInfo.setEating(new int[]{10, 0, 0, 0, 0});
+		bigInfo.setEating(new int[]{10, 0, 0, 0, 0, 0, 0, 0, 0, 0});
+		assert smallInfo.hand[0] == 0;
+		assert bigInfo.hand[0] == 0;
+		smallInfo.update(0);
+		bigInfo.update(0);
+		assert smallInfo.pile.trading.size() == 1;
+		assert bigInfo.pile.trading.size() == 1;
+		assert Math.round(smallInfo.preference[0]) == 0;
+		assert Math.round(bigInfo.preference[0]) == 0;
+		
+		smallInfo.setEating(new int[]{0, 10, 0, 0, 0});
+		bigInfo.setEating(new int[]{0, 10, 0, 0, 0, 0, 0, 0, 0, 0});
+		smallInfo.update(100);
+		bigInfo.update(-100);
+		assert smallInfo.pile.hoarding.size() == 1 && smallInfo.pile.trading.size() == 1;
+		assert bigInfo.pile.trading.size() == 2 && bigInfo.pile.hoarding.size() == 0;
+		Util.print(smallInfo.preference);
+		assert Math.round(smallInfo.preference[1]) == 1;
+		assert Math.round(bigInfo.preference[1]) == -1;
+		
+		int[] trading = bigInfo.pile.getTradingColorsByPreference();
+		assert trading[0] == 0;
+		assert trading[1] == 1;
+	}
+	
+	public void testInfoEvaluate(){
+		smallInfo.preference = new double[]{1.0, 0.5, 0.2, -0.1, 0};
+		double eval = smallInfo.evaluate(new int[]{2,0,0,2,0}, new int[5], false);
+		assert Math.round(10*(eval - 3.8)) == 0;
+	}	
 }

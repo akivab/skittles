@@ -16,6 +16,7 @@ public class Info {
 	public Offer[] currentOffers;
 	public Vector<Offer[]> pastOffers;
 	public int[] eating;
+	public Pile pile;
 	public double threshold;
 
 	public Info(int players, int intPlayerIndex, String strClassName,
@@ -26,11 +27,10 @@ public class Info {
 		this.hand = Util.copy(aintInHand);
 		this.pastOffers = new Vector<Offer[]>();
 		this.preference = new double[hand.length];
-		for (int i = 0; i < hand.length; i++)
-			preference[i] = 0.1;
 		this.eating = new int[hand.length];
 		this.tasted = new boolean[hand.length];
 		this.threshold = computeThreshold();
+		this.pile = new Pile(this);
 	}
 
 	public void setEating(int[] eating) {
@@ -49,6 +49,7 @@ public class Info {
 		for (int i = 0; i < eating.length; i++) {
 			if (eating[i] != 0) {
 				preference[i] = happiness / (eating[i] * eating[i]);
+				if(!tasted[i]) pile.add(i);
 				tasted[i] = true;
 			}
 		}
