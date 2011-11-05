@@ -59,6 +59,21 @@ public class Test {
 		int[] trading = bigInfo.pile.getTradingColorsByPreference();
 		assert trading[0] == 0;
 		assert trading[1] == 1;
+		
+		for(int i = 2; i < 5; i++){
+			int[] eat = new int[5];
+			eat[i] = 10;
+			smallInfo.setEating(eat);
+			smallInfo.update(100);
+		}
+		
+		trading = smallInfo.pile.getTradingColorsByPreference();
+		int[] hoarding = smallInfo.pile.getHoardingColorsByPreference();
+		Util.print(hoarding);
+		assert hoarding.length == smallInfo.hoardingCount();
+		assert trading.length == smallInfo.hand.length - smallInfo.hoardingCount();
+		assert hoarding[0] == 1;
+		assert trading[trading.length-1] == 0;
 	}
 	
 	public void testInfoEvaluate(){

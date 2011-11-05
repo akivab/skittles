@@ -16,7 +16,7 @@ public class Pile {
 	
 	public void add(int color){
 		double preference = info.preference[color];
-		if(preference > info.threshold || trading.size() == info.hoardingCount())
+		if(hoarding.size() != info.hoardingCount() && (preference > info.threshold || trading.size() == info.hoardingCount()))
 			hoarding.add(color);
 		else
 			trading.add(color);
