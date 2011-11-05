@@ -1,5 +1,7 @@
 package skittles.g3_2;
 
+import java.util.Arrays;
+import java.util.Random;
 import java.util.Vector;
 
 import skittles.sim.Offer;
@@ -14,10 +16,10 @@ public class Info {
 	public Offer[] currentOffers;
 	public Vector<Offer[]> pastOffers;
 	public int[] eating;
+	public double threshold;
 
 	public Info(int players, int intPlayerIndex, String strClassName,
 			int[] aintInHand) {
-
 		this.numPlayers = players;
 		this.id = intPlayerIndex;
 		this.name = strClassName;
@@ -28,6 +30,7 @@ public class Info {
 			preference[i] = 0.1;
 		this.eating = new int[hand.length];
 		this.tasted = new boolean[hand.length];
+		this.threshold = computeThreshold();
 	}
 
 	public void setEating(int[] eating) {
@@ -49,6 +52,25 @@ public class Info {
 				tasted[i] = true;
 			}
 		}
+	}
+
+	public int hoardingCount() {
+		int colors = hand.length;
+		return Math.min(colors / 2, (int) Math.ceil(colors / (double) numPlayers));
+	}
+
+	public double computeThreshold() {
+		int count = hoardingCount();
+		int simulationSize = 100000;
+		double[] points = new double [simulationSize];
+		Random random = new Random();
+		for (int i = 0 ; i != simulationSize ; ++i) {
+			points[i] = random.nextGaussian();
+			if (points[i] < -1.0 || points[i] > 1.0) i--;
+		}
+		Arrays.sort(points);
+		double perc = 1.0 -  count / (double) hand.length;
+		return points[(int) (perc * simulationSize)];
 	}
 
 	public void recordOffers(Offer[] offers) {

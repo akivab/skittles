@@ -13,7 +13,9 @@ public class Test {
 			throw new Exception("Not gonna happen, bubs.");
 	}
 	public Test() throws Exception{
-		Info info = new Info(2, 1, "Test", new int[]{2,2,2,2,2});
+		Info info = new Info(20, 1, "Test", new int[]{2,2,2,2,2});
+		System.out.println("k = " + info.hoardingCount());
+		System.out.println("threshold = " + info.computeThreshold());
 		for(int i : info.hand)
 			do_assert(i == 2);
 		System.out.println("Initialization OK");

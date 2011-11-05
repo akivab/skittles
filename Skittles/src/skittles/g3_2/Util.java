@@ -81,7 +81,6 @@ public class Util {
 	public static int[] rank(double[] value) {
 		int[] index = index(value);
 		int[] rank = new int[index.length];
-
 		for (int i = 0; i != index.length; ++i)
 			rank[index[i]] = i;
 		return rank;
