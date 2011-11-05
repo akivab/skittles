@@ -5,6 +5,8 @@ public class Test {
 		Test test = new Test();
 		test.testInfo();
 		System.out.println("Testing OK");
+		test.testEater();
+		System.out.println("Eating OK");
 		test.testInfoEvaluate();
 		System.out.println("Evaluation OK");
 		test.testInfoHoardingCount();
@@ -98,4 +100,28 @@ public class Test {
 		double eval = smallInfo.evaluate(new int[]{2,0,0,2,0}, new int[5], false);
 		assert Math.round(10*(eval - 3.8)) == 0;
 	}	
+	
+	public void testEater(){
+		Info test = new Info(numPlayers, playerIndex, "Test", new int[]{1,2,3,4,5});		
+		Eater eat = new Eater(test);
+		int[] eating = new int[smallInfo.hand.length];
+		eat.decideToEat(eating);
+		for(int i = 0; i < eating.length; i++)
+			if(i != eating.length-1) // we want to eat from biggest pile!
+				assert eating[i] == 0;
+			else
+				assert eating[i] == 1;
+		test.setEating(eating);
+		test.update(1);
+		eat.decideToEat(eating);
+		for(int i = 0; i < eating.length; i++)
+			if(i != eating.length-2) // we want to eat from biggest pile!
+				assert eating[i] == 0;
+			else
+				assert eating[i] == 1;
+		
+		assert test.pile.hoarding.size() == 1;
+		
+		
+	}
 }
