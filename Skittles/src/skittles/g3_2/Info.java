@@ -1,6 +1,9 @@
 package skittles.g3_2;
 
+import java.text.Format;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Random;
 import java.util.Vector;
 
@@ -18,6 +21,9 @@ public class Info {
 	public int[] eating;
 	public Pile pile;
 	public double threshold;
+	public HashMap<Integer, ArrayList<Integer>> profiles;
+	public int initialSkittlesPerColor; // the estimated number of skittles of
+										// each color other player has
 
 	public Info(int players, int intPlayerIndex, String strClassName,
 			int[] aintInHand) {
@@ -31,6 +37,22 @@ public class Info {
 		this.tasted = new boolean[hand.length];
 		this.threshold = computeThreshold();
 		this.pile = new Pile(this);
+		this.profiles = new HashMap<Integer, ArrayList<Integer>>();
+
+		// initialSkittlesPerColor = #skittles / #colors
+		initialSkittlesPerColor = Util.sum(hand) / hand.length;
+		for (int id = 0; id != numPlayers; ++id) {
+			if (id == this.id) // omit "me"
+				continue;
+
+			// let v = initialSkittlesPerColor
+			// each profile is = <v, v, ..., v>, where the length is #colors
+			ArrayList<Integer> profile = new ArrayList<Integer>(hand.length);
+			for (int color = 0; color != hand.length; ++color)
+				profile.add(initialSkittlesPerColor);
+
+			profiles.put(id, profile);
+		}
 	}
 
 	public void setEating(int[] eating) {
@@ -49,7 +71,8 @@ public class Info {
 		for (int i = 0; i < eating.length; i++) {
 			if (eating[i] != 0) {
 				preference[i] = happiness / (eating[i] * eating[i]);
-				if(!tasted[i]) pile.add(i);
+				if (!tasted[i])
+					pile.add(i);
 				tasted[i] = true;
 			}
 		}
@@ -57,20 +80,22 @@ public class Info {
 
 	public int hoardingCount() {
 		int colors = hand.length;
-		return Math.min(colors / 2, (int) Math.ceil(colors / (double) numPlayers));
+		return Math.min(colors / 2,
+				(int) Math.ceil(colors / (double) numPlayers));
 	}
 
 	public double computeThreshold() {
 		int count = hoardingCount();
 		int simulationSize = 100000;
-		double[] points = new double [simulationSize];
+		double[] points = new double[simulationSize];
 		Random random = new Random();
-		for (int i = 0 ; i != simulationSize ; ++i) {
+		for (int i = 0; i != simulationSize; ++i) {
 			points[i] = random.nextGaussian();
-			if (points[i] < -1.0 || points[i] > 1.0) i--;
+			if (points[i] < -1.0 || points[i] > 1.0)
+				i--;
 		}
 		Arrays.sort(points);
-		double perc = 1.0 -  count / (double) hand.length;
+		double perc = 1.0 - count / (double) hand.length;
 		return points[(int) (perc * simulationSize)];
 	}
 
@@ -85,6 +110,52 @@ public class Info {
 					hand[i] += offer.getOffer()[i] - offer.getDesire()[i];
 			pastOffers.add(offers);
 		}
+		updateProfiles(offers);
+	}
+
+	public void updateProfiles(Offer[] offers) {
+		for (Offer offer : offers) {
+			int giver = offer.getOfferedByIndex();
+			int[] give = offer.getOffer();
+			int taker = offer.getPickedByIndex();
+			int[] take = offer.getDesire();
+
+			if (taker != -1) {
+				if (giver != this.id) {
+					ArrayList<Integer> giverProfile = profiles.get(giver);
+					for (int color = 0; color != hand.length; ++color) {
+						int v = giverProfile.get(color) + take[color]
+								- give[color];
+						giverProfile.set(color, v);
+
+					}
+				}
+				if (taker != this.id) {
+					ArrayList<Integer> takerProfile = profiles.get(taker);
+					for (int color = 0; color != hand.length; ++color) {
+						int v = takerProfile.get(color) - take[color]
+								+ give[color];
+						takerProfile.set(color, v);
+					}
+				}
+			}  else if (giver != this.id) {
+				// taker == -1 i.e. proposed but not executed offer
+				// and it's not my offer
+				ArrayList<Integer> giverProfile = profiles.get(giver);
+				for (int color = 0; color != hand.length; ++color) {
+					 if (giverProfile.get(color) < give[color])	// he can still supply more than his profile
+						 giverProfile.set(color, give[color]);	// update his profile
+				}
+			}
+		}
+
+		/*System.out.println("Profiles:");
+		for (int id = 0; id != this.numPlayers; ++id) {
+			if (id == this.id)
+				continue;
+			ArrayList<Integer> profile = profiles.get(id);
+			System.out.println("Player #" + id + ": " + profile);
+		}*/
 	}
 
 	public double evaluate(int[] offer, int[] desire, boolean usingProfile) {
@@ -101,7 +172,7 @@ public class Info {
 	}
 
 	public void recordPicked(Offer offer) {
-		// we picked an offer.
+		// we got an offer picked.
 		int[] taking = offer.getDesire();
 		int[] giving = offer.getOffer();
 		for (int i = 0; i < hand.length; i++)
