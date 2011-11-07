@@ -52,6 +52,8 @@ public class Trader {
 		
 		give[colorToGive] = take[colorToTake] = maxSize;
 		off.setOffer(give, take);
+		if (Util.sum(take) == 0 && info.currentTurn > info.hand.length)
+			info.endGame = true;
 	}
 
 	public Offer pickOffer() {

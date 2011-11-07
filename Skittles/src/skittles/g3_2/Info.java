@@ -11,7 +11,7 @@ import skittles.sim.Offer;
 
 public class Info {
 	
-	public final static double DECREASING_FACTOR = 0.8;
+	public final static double DECREASING_FACTOR = 0.5;
 	
 	public int numPlayers;
 	public int id;
@@ -126,10 +126,11 @@ public class Info {
 	public void updateProfiles(Offer[] offers) {
 		endGame = true;
 		for (Offer offer : offers) {
-			if (Util.sum(offer.getOffer()) != 0)
-				endGame = false;
+			if (offer.getOfferedByIndex() != this.id)
+				if (Util.sum(offer.getOffer()) != 0)
+					endGame = false;
 		}
-		
+		// if everyone else proposed an empty offer
 		if (endGame == true)
 			return;
 		
