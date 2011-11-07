@@ -16,10 +16,34 @@ public class Pile {
 	
 	public void add(int color){
 		double preference = info.preference[color];
-		if(hoarding.size() != info.hoardingCount() && (preference > info.threshold || trading.size() == info.hoardingCount()))
-			hoarding.add(color);
+		if(preference > info.threshold)
+			if(hoarding.size() != info.hoardingCount())
+				hoarding.add(color);
+			else{
+				int[] colors = this.getHoardingColorsByPreference();
+				if(info.preference[colors[colors.length-1]] < info.preference[color]){
+					int colorTraded = colors[colors.length-1];
+					hoarding.remove(colors[colors.length-1]);
+					hoarding.add(color);
+					trading.add(colorTraded);
+				} else {
+					trading.add(color);
+				}
+			}
 		else
-			trading.add(color);
+			if(trading.size() != info.hand.length - info.hoardingCount())
+				trading.add(color);
+			else{
+				int[] colors = this.getTradingColorsByPreference();
+				if(info.preference[colors[0]] > info.preference[color]){
+					int colorTraded = colors[0];
+					trading.remove(colors[0]);
+					trading.add(color);
+					hoarding.add(colorTraded);
+				} else {
+					trading.add(color);
+				}				
+			}
 	}
 	
 	public String toString(){

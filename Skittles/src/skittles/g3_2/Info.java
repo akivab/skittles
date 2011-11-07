@@ -149,13 +149,13 @@ public class Info {
 			}
 		}
 
-		/*System.out.println("Profiles:");
+		System.out.println("Profiles:");
 		for (int id = 0; id != this.numPlayers; ++id) {
 			if (id == this.id)
 				continue;
 			ArrayList<Integer> profile = profiles.get(id);
 			System.out.println("Player #" + id + ": " + profile);
-		}*/
+		}
 	}
 
 	public double evaluate(int[] offer, int[] desire, boolean usingProfile) {

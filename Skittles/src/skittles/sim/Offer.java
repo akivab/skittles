@@ -1,5 +1,7 @@
 package skittles.sim;
 
+import java.util.ArrayList;
+
 public class Offer 
 {
 	private int[] aintOffer;
@@ -8,6 +10,8 @@ public class Offer
 	private boolean blnOfferLive;
 	private int intColorNum;
 	private int intPickedByIndex = -1;
+	
+	private boolean hasBeenSet = false; 
 	
 	public Offer( int intOfferedByIndex, int intColorNum )
 	{
@@ -18,30 +22,27 @@ public class Offer
 		blnOfferLive = true;
 	}
 	
-	public Offer(int[] offer, int[] desire, int offeredBy, int pickedBy){
-		this.aintOffer = offer;
-		this.aintDesire = desire;
-		this.intOfferedByIndex = offeredBy;
-		this.intPickedByIndex = pickedBy;
-	}
-	
 	public void setOffer( int[] aintOffer, int[] aintDesire )
 	{
-		int intOfferCount = 0;
-		int intDesireCount = 0;
-		for ( int intColorIndex = 0; intColorIndex < intColorNum; intColorIndex ++ )
-		{
-			intOfferCount += aintOffer[ intColorIndex ];
-			intDesireCount += aintDesire[ intColorIndex ];
-		}
-		if ( intOfferCount != intDesireCount )
-		{
-			System.out.println( "Player #" + intOfferedByIndex + "'s offer is invalid" );
-		}
-		else
-		{
-			this.aintOffer = aintOffer;
-			this.aintDesire = aintDesire;
+		if ( hasBeenSet == false )
+		{	
+			int intOfferCount = 0;
+			int intDesireCount = 0;
+			for ( int intColorIndex = 0; intColorIndex < intColorNum; intColorIndex ++ )
+			{
+				intOfferCount += aintOffer[ intColorIndex ];
+				intDesireCount += aintDesire[ intColorIndex ];
+			}
+			if ( intOfferCount != intDesireCount )
+			{
+				System.out.println( "Player #" + intOfferedByIndex + "'s offer is invalid" );
+			}
+			else
+			{
+				this.aintOffer = aintOffer;
+				this.aintDesire = aintDesire;
+			}
+			hasBeenSet = true;
 		}
 	}
 	

@@ -37,10 +37,13 @@ public class Eater {
 				// pick the biggest pile
 				if (whichColor < 0 || info.hand[color] > info.hand[whichColor])
 					whichColor = color;
+			
 		}
 		// if there was a skittle in a non-stacked pile
-		if (whichColor >= 0)
+		if (whichColor >= 0){
+			howMany = 1;
 			return;
+		}
 		// pick from stacked piles
 		int[] hoarding = info.pile.getHoardingColorsByPreference();
 		for (int i = 0 ; i != hoarding.length ; ++i) {

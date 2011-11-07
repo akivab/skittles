@@ -212,6 +212,7 @@ public class Info {
 
 	public double taste(int color)
 	{
+		if(color < 0) return 0;
 		return !tasted[color] ? 0.0 : taste[color];
 	}
 
