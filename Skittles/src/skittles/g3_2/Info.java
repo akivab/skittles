@@ -10,6 +10,9 @@ import java.util.Vector;
 import skittles.sim.Offer;
 
 public class Info {
+	
+	public final static double DECREASING_FACTOR = 0.8;
+	
 	public int numPlayers;
 	public int id;
 	public String name;
@@ -24,6 +27,9 @@ public class Info {
 	public HashMap<Integer, ArrayList<Integer>> profiles;
 	public int initialSkittlesPerColor; // the estimated number of skittles of
 										// each color other player has
+	public boolean endGame;
+	public int currentTurn;
+	public int previousTarget;
 
 	public Info(int players, int intPlayerIndex, String strClassName,
 			int[] aintInHand) {
@@ -38,6 +44,9 @@ public class Info {
 		this.threshold = computeThreshold();
 		this.pile = new Pile(this);
 		this.profiles = new HashMap<Integer, ArrayList<Integer>>();
+		this.endGame = false;
+		this.currentTurn = 0;
+		this.previousTarget = -1;
 
 		// initialSkittlesPerColor = #skittles / #colors
 		initialSkittlesPerColor = Util.sum(hand) / hand.length;
@@ -56,6 +65,7 @@ public class Info {
 	}
 
 	public void setEating(int[] eating) {
+		this.currentTurn += 1;
 		this.eating = Util.copy(eating);
 		for (int i = 0; i < eating.length; i++)
 			hand[i] -= eating[i];
@@ -114,11 +124,28 @@ public class Info {
 	}
 
 	public void updateProfiles(Offer[] offers) {
+		endGame = true;
+		for (Offer offer : offers) {
+			if (Util.sum(offer.getOffer()) != 0)
+				endGame = false;
+		}
+		
+		if (endGame == true)
+			return;
+		
 		for (Offer offer : offers) {
 			int giver = offer.getOfferedByIndex();
 			int[] give = offer.getOffer();
 			int taker = offer.getPickedByIndex();
 			int[] take = offer.getDesire();
+			
+			if (taker == -1 && giver == this.id) {
+				ArrayList<Integer> targetProfile = profiles.get(previousTarget);
+				for (int color = 0; color != hand.length; ++color) {
+					if (take[color] != 0)
+						targetProfile.set(color, (int) (take[color] * DECREASING_FACTOR));
+				}
+			}
 
 			if (taker != -1) {
 				if (giver != this.id) {
@@ -164,7 +191,7 @@ public class Info {
 			double tmp = (usingProfile ? hand[i] : 0) + offer[i] - desire[i];
 			if (tmp < 0) // invalid offer (gives negative something)
 				return -1;
-			else if (preference[i] > 0)
+			else if (tasted[i])
 				tmp *= tmp;
 			value += tmp * preference[i];
 		}

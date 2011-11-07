@@ -14,6 +14,22 @@ public class Eater {
 		whichColor = -1;
 		howMany = 1;
 		int colors = info.hand.length;
+		
+		// if endGame phase
+		if (info.endGame && info.currentTurn > info.hand.length) {
+			for (int i = 0; i != info.hand.length; ++i) {
+				if (info.hand[i] > 0){
+					whichColor = i;
+					if (info.preference[i] > 0)
+						howMany = info.hand[i];
+					else
+						howMany = 1;
+					return;
+				}
+			}
+		}
+		
+		
 		// get all unknown colors
 		int[] unknown = new int [colors];
 		int unknownCount = 0;
@@ -37,7 +53,6 @@ public class Eater {
 				// pick the biggest pile
 				if (whichColor < 0 || info.hand[color] > info.hand[whichColor])
 					whichColor = color;
-			
 		}
 		// if there was a skittle in a non-stacked pile
 		if (whichColor >= 0){

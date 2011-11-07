@@ -19,6 +19,7 @@ public class Trader {
 		int maxSize = 0;
 		int colorToTake = 0;
 		int colorToGive = 0;
+		info.previousTarget = -1;
 
 		for (int id = 0; id != info.numPlayers; ++id) {
 			if (id == info.id)
@@ -38,6 +39,7 @@ public class Trader {
 						maxSize = offerSize;
 						colorToTake = colorHoarding;
 						colorToGive = colorTrading;
+						info.previousTarget = id;
 					}
 				}
 		}
@@ -53,12 +55,17 @@ public class Trader {
 	}
 
 	public Offer pickOffer() {
+		Offer best = null;
+		double maxValue = 0;
 		for (Offer off : info.currentOffers) {
 			if (off.getOfferLive() && off.getOfferedByIndex() != info.id) {
-				if (info.evaluate(off.getOffer(), off.getDesire(), true) > 0)
-					return off;
+				double currentValue = info.evaluate(off.getOffer(), off.getDesire(), true);
+				if (currentValue > maxValue) {
+					best = off;
+					maxValue = currentValue;
+				}
 			}
 		}
-		return null;
+		return best;
 	}
 }
