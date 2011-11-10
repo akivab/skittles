@@ -10,9 +10,9 @@ import java.util.Vector;
 import skittles.sim.Offer;
 
 public class Info {
-	
-	public final static double DECREASING_FACTOR = 0.8;
-	
+
+	public final static double DECREASING_FACTOR = 0.9;
+
 	public int numPlayers;
 	public int id;
 	public String name;
@@ -124,26 +124,30 @@ public class Info {
 	}
 
 	public void updateProfiles(Offer[] offers) {
-		endGame = true;
-		for (Offer offer : offers) {
-			if (Util.sum(offer.getOffer()) != 0)
-				endGame = false;
+		if (this.currentTurn > hand.length) { // if everyone has already tasted all skittles
+			endGame = true;
+			for (Offer offer : offers) {
+				if (offer.getOfferedByIndex() != this.id)
+					if (Util.sum(offer.getOffer()) != 0)
+						endGame = false;
+			}
+			// if everyone else proposed an empty offer
+			if (endGame == true)
+				return;
 		}
-		
-		if (endGame == true)
-			return;
-		
+
 		for (Offer offer : offers) {
 			int giver = offer.getOfferedByIndex();
 			int[] give = offer.getOffer();
 			int taker = offer.getPickedByIndex();
 			int[] take = offer.getDesire();
-			
+
 			if (taker == -1 && giver == this.id) {
 				ArrayList<Integer> targetProfile = profiles.get(previousTarget);
 				for (int color = 0; color != hand.length; ++color) {
 					if (take[color] != 0)
-						targetProfile.set(color, (int) (take[color] * DECREASING_FACTOR));
+						targetProfile.set(color,
+								(int) (take[color] * DECREASING_FACTOR));
 				}
 			}
 
@@ -165,13 +169,17 @@ public class Info {
 						takerProfile.set(color, v);
 					}
 				}
-			}  else if (giver != this.id) {
+			} else if (giver != this.id) {
 				// taker == -1 i.e. proposed but not executed offer
 				// and it's not my offer
 				ArrayList<Integer> giverProfile = profiles.get(giver);
 				for (int color = 0; color != hand.length; ++color) {
-					 if (giverProfile.get(color) < give[color])	// he can still supply more than his profile
-						 giverProfile.set(color, give[color]);	// update his profile
+					if (giverProfile.get(color) < give[color]) // he can still
+																// supply more
+																// than his
+																// profile
+						giverProfile.set(color, give[color]); // update his
+																// profile
 				}
 			}
 		}
