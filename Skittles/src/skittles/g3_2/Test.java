@@ -29,8 +29,8 @@ public class Test {
 	}
 	
 	public void testInfo(){
-		smallInfo = new Info(numPlayers, playerIndex, "Test", smallHand);
-		bigInfo = new Info(numPlayers, playerIndex, "Test", bigHand);
+		smallInfo = new Info(numPlayers, 0, playerIndex, "Test", smallHand);
+		bigInfo = new Info(numPlayers, 0, playerIndex, "Test", bigHand);
 		assert smallInfo.hoardingCount() == 1;
 		assert bigInfo.hoardingCount() == 2;
 		assert smallInfo.pile.trading.size() == 0 && smallInfo.pile.hoarding.size() == 0;
@@ -102,7 +102,7 @@ public class Test {
 	}	
 	
 	public void testEater(){
-		Info test = new Info(numPlayers, playerIndex, "Test", new int[]{1,2,3,4,5});		
+		Info test = new Info(numPlayers, 0, playerIndex, "Test", new int[]{1,2,3,4,5});		
 		Eater eat = new Eater(test);
 		int[] eating = new int[smallInfo.hand.length];
 		eat.decideToEat(eating);

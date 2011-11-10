@@ -133,6 +133,10 @@ public class PlayerStatus
 		strReturn += strInHand.substring( 0, strInHand.length() - 2 ) + " ]";
 		return strReturn;
 	}
+	
+	public double[] getPreferences(){
+		return adblTaste;
+	}
 
 	public double getHappiness() 
 	{

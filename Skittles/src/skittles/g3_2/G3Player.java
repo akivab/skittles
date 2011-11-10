@@ -43,9 +43,9 @@ public class G3Player extends skittles.sim.Player {
 		info.recordExecuted(aoffCurrentOffers);
 	}
 
-	public void initialize(int players, int intPlayerIndex,
+	public void initialize(int players, double dblTasteMean, int intPlayerIndex,
 			String strClassName, int[] aintInHand) {
-		info = new Info(players, intPlayerIndex, strClassName, aintInHand);
+		info = new Info(players, dblTasteMean, intPlayerIndex, strClassName, aintInHand);
 		trader = new Trader(info);
 		eater = new Eater(info);
 	}

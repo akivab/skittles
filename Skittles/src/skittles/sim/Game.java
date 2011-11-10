@@ -1,21 +1,21 @@
 package skittles.sim;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Random;
 import java.util.Scanner;
 
-import javax.xml.parsers.*;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
 import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-
-import skittles.manualplayer.ManualP;
 
 public class Game 
 {
@@ -23,9 +23,11 @@ public class Game
 	private PlayerStatus[] aplsPlayerStatus;
 	private int intPlayerNum;
 	private int intColorNum;
-	
+	public Visualization viz = new Visualization();
 	private Offer[] aoffCurrentOffers = null;
 	private int[][] aintCurrentEats = null;
+	
+	private double dblTasteMean;
 	
 	public static Scanner scnInput = new Scanner( System.in );
 	
@@ -91,11 +93,12 @@ public class Game
 				else
 				{
 					double dblMean = Double.parseDouble( astrTastes[ 1 ] );
+					this.dblTasteMean = dblMean;
 					adblTastes = randomTastes( dblMean );
 					System.out.println( "Random color happiness:" );
 					for ( int intColorIndex = 0; intColorIndex < intColorNum; intColorIndex ++ )
 					{
-						System.out.print( adblTastes[ intColorIndex ] );
+						System.out.print( adblTastes[ intColorIndex ] + " " );
 					}
 					System.out.println();
 				}
@@ -136,7 +139,7 @@ public class Game
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				plyNew.initialize( intPlayerNum, i, strPlayerClass, aintInHand.clone() );
+				plyNew.initialize( intPlayerNum, dblTasteMean, i, strPlayerClass, aintInHand.clone() );
 				alPlayers.add( plyNew );
 				PlayerStatus plsTemp = new PlayerStatus( i, strPlayerClass, aintInHand.clone(), adblTastes.clone() );
 				alPlayerStatus.add( plsTemp );
@@ -167,28 +170,31 @@ public class Game
 		logGame( abfwPortfolio, "P" );
 		logGame( abfwPortfolio, "H" );
 		logGame( abfwPortfolio, "N" );
+		int time = 0;
+		viz.setPlayers(this.aplyPlayers);
 		while ( !checkFinish() )
 		{
 			showEveryInHand();		
 			everyoneEatAndOffer();
 			logGame( abfwPortfolio, "E" );
+			viz.updateStatuses(time, aplsPlayerStatus);
 			int[] aintOrder = generateRandomOfferPickOrder();			// need code to log the order for repeated game
 			pickOfferInOrder( aintOrder );
+			viz.updateOffers(time++, aoffCurrentOffers);
 			broadcastOfferExcution();
 			logGame( abfwPortfolio, "O" );
 			logGame( abfwPortfolio, "P" );
 			logGame( abfwPortfolio, "H" );
 			logGame( abfwPortfolio, "N" );
 		}
-		double dblAver = 0;
+		double dblTotal = 0;
 		for ( PlayerStatus plsTemp : aplsPlayerStatus )
 		{
-			dblAver += plsTemp.getHappiness();
+			dblTotal += plsTemp.getHappiness();
 		}
-		dblAver = dblAver / intPlayerNum;
 		for ( PlayerStatus plsTemp : aplsPlayerStatus )
 		{
-			double dblTempHappy = plsTemp.getHappiness() + dblAver;
+			double dblTempHappy = ( plsTemp.getHappiness() + ( dblTotal - plsTemp.getHappiness() ) / ( intPlayerNum - 1 ) ) / 2;
 			System.out.println( "Player #" + plsTemp.getPlayerIndex() + "'s happiness is: " + dblTempHappy );
 		}
 		
@@ -200,8 +206,18 @@ public class Game
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			System.exit(0);
 			e.printStackTrace();
+		}
+		
+
+		viz.generateGraphs();
+		try{
+		    Scanner in = new Scanner(new File("VIZ_CONFIG.txt"));
+		    viz.generateHTML(in.nextLine().trim());
+		}
+		catch(Exception e){
+			e.printStackTrace();
+			System.exit(-1);
 		}
 		
 	}

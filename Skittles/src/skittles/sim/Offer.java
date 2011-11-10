@@ -1,7 +1,5 @@
 package skittles.sim;
 
-import java.util.ArrayList;
-
 public class Offer 
 {
 	private int[] aintOffer;
@@ -20,6 +18,12 @@ public class Offer
 		aintOffer = new int[ intColorNum ];
 		aintDesire = new int[ intColorNum ];
 		blnOfferLive = true;
+	}
+	
+	public Offer(int[] desiring, int[] offering, int pickedBy, int offeredBy){
+		this.intOfferedByIndex = offeredBy;
+		this.intPickedByIndex = pickedBy;
+		this.setOffer(offering, desiring);
 	}
 	
 	public void setOffer( int[] aintOffer, int[] aintDesire )

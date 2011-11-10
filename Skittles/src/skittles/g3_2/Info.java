@@ -31,7 +31,7 @@ public class Info {
 	public int currentTurn;
 	public int previousTarget;
 
-	public Info(int players, int intPlayerIndex, String strClassName,
+	public Info(int players, double tasteMean, int intPlayerIndex, String strClassName,
 			int[] aintInHand) {
 		this.numPlayers = players;
 		this.id = intPlayerIndex;
@@ -41,7 +41,7 @@ public class Info {
 		this.preference = new double[hand.length];
 		this.eating = new int[hand.length];
 		this.tasted = new boolean[hand.length];
-		this.threshold = computeThreshold();
+		this.threshold = computeThreshold() + tasteMean;
 		this.pile = new Pile(this);
 		this.profiles = new HashMap<Integer, ArrayList<Integer>>();
 		this.endGame = false;
