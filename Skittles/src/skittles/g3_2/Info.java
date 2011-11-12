@@ -100,12 +100,14 @@ public class Info {
 		Random random = new Random();
 		for (int i = 0; i != simulationSize; ++i) {
 			points[i] = random.nextGaussian() + mean;
-			if (points[i] < -1.0 || points[i] > 1.0)
-				i--;
+			if (points[i] < -1.0 || points[i] > 1.0) i--;
 		}
 		Arrays.sort(points);
 		double perc = 1.0 - count / (double) hand.length;
-		return points[(int) (perc * simulationSize)];
+		int offset = (int) (perc * simulationSize);
+		if (offset == points.length)
+			offset--;
+		return points[offset];
 	}
 
 	public void recordOffers(Offer[] offers) {
