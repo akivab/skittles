@@ -213,7 +213,7 @@ public class Game
 		viz.generateGraphs();
 		try{
 		    Scanner in = new Scanner(new File("VIZ_CONFIG.txt"));
-		    viz.generateHTML(in.nextLine().trim());
+	//	    viz.generateHTML(in.nextLine().trim());
 		}
 		catch(Exception e){
 			e.printStackTrace();

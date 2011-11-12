@@ -1,6 +1,5 @@
 package skittles.g3_2;
 
-import java.text.Format;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -41,7 +40,7 @@ public class Info {
 		this.preference = new double[hand.length];
 		this.eating = new int[hand.length];
 		this.tasted = new boolean[hand.length];
-		this.threshold = computeThreshold() + tasteMean;
+		this.threshold = computeThreshold(tasteMean);
 		this.pile = new Pile(this);
 		this.profiles = new HashMap<Integer, ArrayList<Integer>>();
 		this.endGame = false;
@@ -94,13 +93,13 @@ public class Info {
 				(int) Math.ceil(colors / (double) numPlayers));
 	}
 
-	public double computeThreshold() {
+	public double computeThreshold(double mean) {
 		int count = hoardingCount();
 		int simulationSize = 100000;
 		double[] points = new double[simulationSize];
 		Random random = new Random();
 		for (int i = 0; i != simulationSize; ++i) {
-			points[i] = random.nextGaussian();
+			points[i] = random.nextGaussian() + mean;
 			if (points[i] < -1.0 || points[i] > 1.0)
 				i--;
 		}

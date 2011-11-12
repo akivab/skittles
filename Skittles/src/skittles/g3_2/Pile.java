@@ -7,13 +7,13 @@ public class Pile {
 	public HashSet<Integer> trading;
 	public HashSet<Integer> hoarding;
 	public Info info;
-	
+
 	public Pile(Info info){
 		this.info = info;
 		this.trading = new HashSet<Integer>();
 		this.hoarding = new HashSet<Integer>();
 	}
-	
+
 	public void add(int color){
 		double preference = info.preference[color];
 		if(preference > info.threshold)
@@ -45,12 +45,11 @@ public class Pile {
 				}				
 			}
 	}
-	
+
 	public String toString(){
 		return "trade: "+ trading.toString() + ", hoard:" +hoarding.toString();
 	}
-	
-	
+
 	// get back a list of colors by preference
 	// e.g. if we have colors 1,2,3 in list, and like them in rank 2,3,1, we get back 2,3,1.
 	public int[] getColorsByPreference(HashSet<Integer> vals){
@@ -67,16 +66,16 @@ public class Pile {
 			toReturn[i] = indices[prefIndices[i]];
 		return toReturn;
 	}
-	
+
 	/**
 	 * Most preferred is first.
-	 * 
+	 *
 	 * Returns a list of indices for colors by preference
 	 */
 	public int[] getTradingColorsByPreference(){
 		return this.getColorsByPreference(trading);
 	}
-	
+
 	public int[] getHoardingColorsByPreference(){
 		return this.getColorsByPreference(hoarding);
 	}

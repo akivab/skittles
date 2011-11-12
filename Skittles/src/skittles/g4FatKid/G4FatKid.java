@@ -312,7 +312,7 @@ public class G4FatKid extends Player {
 	}
 
 	@Override
-	public void initialize(int playerNum, int playerIndex, String className,
+	public void initialize(int playerNum, double mean, int playerIndex, String className,
 			int[] aintInHand) {
 
 		this.lowerThreshold = 0.0;

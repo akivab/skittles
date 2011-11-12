@@ -8,8 +8,8 @@ public class G3Player extends skittles.sim.Player {
 	public Trader trader;
 
 	public void eat(int[] aintTempEat) {
-		// eater modifies aintTempEat, and lets info know what we decided to
-		// eat.
+		// eater modifies aintTempEat, and lets info know what we
+		// decided to eat.
 		eater.decideToEat(aintTempEat);
 		info.setEating(aintTempEat);
 		System.out.println("Hoarding:" + info.pile.hoarding);

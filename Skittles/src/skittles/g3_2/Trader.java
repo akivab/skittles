@@ -2,7 +2,6 @@ package skittles.g3_2;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Random;
 
 import skittles.sim.Offer;
 
@@ -31,7 +30,7 @@ public class Trader {
 						continue;
 					if (profile.get(colorTrading) < info.initialSkittlesPerColor)
 						continue;
-					
+
 					int canTake = profile.get(colorHoarding);
 					int canGive = info.hand[colorTrading];
 					int offerSize = canTake < canGive ? canTake : canGive;
@@ -43,13 +42,13 @@ public class Trader {
 					}
 				}
 		}
-		
+
 		int [] give = new int[info.hand.length];
 		int [] take = new int[info.hand.length];
-		
+
 		for (int i = 0; i != info.hand.length; ++i)
 			give[i] = take[i] = 0;
-		
+
 		give[colorToGive] = take[colorToTake] = maxSize;
 		off.setOffer(give, take);
 		if (Util.sum(take) == 0 && info.currentTurn > info.hand.length)

@@ -44,7 +44,7 @@ public class G3Player extends skittles.sim.Player
 	private int howManyEaten;
 
 	/* Initialize stuff */
-	public void initialize(int players, int myId, String name, int[] hand)
+	public void initialize(int players, double m, int myId, String name, int[] hand)
 	{
 		info = new Info(players, myId, hand);
 		this.name = name;

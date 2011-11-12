@@ -24,7 +24,7 @@ public class ManualP extends Player
 	}
 	
 	@Override
-	public void initialize(int players, int intPlayerIndex, String strClassName, int[] aintInHand)
+	public void initialize(int players, double m, int intPlayerIndex, String strClassName, int[] aintInHand)
 	{
 		this.intPlayerIndex = intPlayerIndex;
 		this.strClassName = strClassName;

@@ -14,7 +14,7 @@ public class Eater {
 		whichColor = -1;
 		howMany = 1;
 		int colors = info.hand.length;
-		
+
 		// if endGame phase
 		if (info.endGame && info.currentTurn > info.hand.length) {
 			for (int i = 0; i != info.hand.length; ++i) {
@@ -28,8 +28,7 @@ public class Eater {
 				}
 			}
 		}
-		
-		
+
 		// get all unknown colors
 		int[] unknown = new int [colors];
 		int unknownCount = 0;
@@ -45,7 +44,6 @@ public class Eater {
 					whichColor = unknown[i];
 			return;
 		}
-		
 		int[] trading = info.pile.getTradingColorsByPreference();
 		for (int i = 0 ; i != trading.length ; ++i) {
 			int color = trading[i];
