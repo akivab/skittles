@@ -105,8 +105,10 @@ public class Info {
 		Arrays.sort(points);
 		double perc = 1.0 - count / (double) hand.length;
 		int offset = (int) (perc * simulationSize);
-		if (offset == points.length)
-			offset--;
+		if (offset >= points.length)
+			offset = points.length - 1;
+		if (offset < 0)
+			offset = 0;
 		return points[offset];
 	}
 
