@@ -6,22 +6,22 @@
 	</Game>
 
 	<Player>
-		<Class>skittles.g3_2.G3Player</Class>
+		<Class>skittles.g3.G3Player</Class>
 		<Happiness>0.5,0.5,0.5</Happiness>
 		<InHand>random</InHand>
 	</Player>
 	<Player>
-		<Class>skittles.g3_2.G3Player</Class>
+		<Class>skittles.g3.G3Player</Class>
 		<Happiness>0.5,0.5,0.5</Happiness>
 		<InHand>random</InHand>
 	</Player>
 		<Player>
-		<Class>skittles.g3_2.G3Player</Class>
+		<Class>skittles.g3.G3Player</Class>
 		<Happiness>0.5,0.5,0.5</Happiness>
 		<InHand>random</InHand>
 	</Player>
 	<Player>
-		<Class>skittles.g3_2.G3Player</Class>
+		<Class>skittles.g3.G3Player</Class>
 		<Happiness>0.5,0.5,0.5</Happiness>
 		<InHand>random</InHand>
 	</Player>

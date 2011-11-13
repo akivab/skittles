@@ -1,4 +1,4 @@
-package skittles.g3_2;
+package skittles.g3;
 
 import java.util.ArrayList;
 import java.util.HashSet;

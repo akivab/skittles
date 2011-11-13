@@ -1,4 +1,4 @@
-package skittles.g3;
+package skittles.g3_alpha;
 
 import java.util.Arrays;
 import java.util.Random;

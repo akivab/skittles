@@ -1,4 +1,4 @@
-package skittles.g3_2;
+package skittles.g3;
 
 public class Eater {
 	public Info info;

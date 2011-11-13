@@ -1,309 +1,219 @@
 package skittles.g3;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Random;
 import java.util.Vector;
 
 import skittles.sim.Offer;
 
 public class Info {
 
-	private int[][] profile;
+	public final static double DECREASING_FACTOR = 0.9;
 
-	private Vector <Offer[]> offers;
+	public int numPlayers;
+	public int id;
+	public String name;
+	public int[] hand;
+	public double[] preference;
+	public boolean[] tasted;
+	public Offer[] currentOffers;
+	public Vector<Offer[]> pastOffers;
+	public int[] eating;
+	public Pile pile;
+	public double threshold;
+	public HashMap<Integer, ArrayList<Integer>> profiles;
+	public int initialSkittlesPerColor; // the estimated number of skittles of
+										// each color other player has
+	public boolean endGame;
+	public int currentTurn;
+	public int previousTarget;
 
-	public final int colors;
-	public final int players;
-	public final int myId;
+	public Info(int players, double tasteMean, int intPlayerIndex, String strClassName,
+			int[] aintInHand) {
+		this.numPlayers = players;
+		this.id = intPlayerIndex;
+		this.name = strClassName;
+		this.hand = Util.copy(aintInHand);
+		this.pastOffers = new Vector<Offer[]>();
+		this.preference = new double[hand.length];
+		this.eating = new int[hand.length];
+		this.tasted = new boolean[hand.length];
+		this.threshold = computeThreshold(tasteMean);
+		this.pile = new Pile(this);
+		this.profiles = new HashMap<Integer, ArrayList<Integer>>();
+		this.endGame = false;
+		this.currentTurn = 0;
+		this.previousTarget = -1;
 
-	private Vector <int[][]> give;
-	private Vector <int[][]> take;
+		// initialSkittlesPerColor = #skittles / #colors
+		initialSkittlesPerColor = Util.sum(hand) / hand.length;
+		for (int id = 0; id != numPlayers; ++id) {
+			if (id == this.id) // omit "me"
+				continue;
 
-	private double[] taste;
-	private boolean[] tasted;
+			// let v = initialSkittlesPerColor
+			// each profile is = <v, v, ..., v>, where the length is #colors
+			ArrayList<Integer> profile = new ArrayList<Integer>(hand.length);
+			for (int color = 0; color != hand.length; ++color)
+				profile.add(initialSkittlesPerColor);
 
-	public Info(int players, int myId, int[] hand)
-	{
-		colors = hand.length;
-		this.players = players;
-		this.myId = myId;
-		profile = new int [players][colors + 1];
-		offers = new Vector <Offer[]> ();
-		/* Total number of skittles per player */
-		int skittles = sum(hand);
-		/* Everyone else's profiles */
-		for (int i = 0 ; i != players ; ++i) {
-			for (int j = 0 ; j != colors ; ++j)
-				profile[i][j] = 0;
-			profile[i][colors] = skittles;
+			profiles.put(id, profile);
 		}
-		/* Your own hand */
-		for (int i = 0 ; i != colors ; ++i)
-			profile[myId][i] = hand[i];
-		profile[myId][colors] = 0;
-		/* Initialize love and hate */
-		give = new Vector <int[][]> ();
-		take = new Vector <int[][]> ();
-		/* Initialize taste and tasted */
-		taste = new double [colors];
-		tasted = new boolean [colors];
-		for (int i = 0 ; i != colors ; ++i)
-			tasted[i] = false;
-//		System.out.println("Hand of " + myId + ": " + Arrays.toString(hand));
 	}
 
-	public void updateOffers(Offer[] offers)
-	{
-		/* Update the profiles */
+	public void setEating(int[] eating) {
+		this.currentTurn += 1;
+		this.eating = Util.copy(eating);
+		for (int i = 0; i < eating.length; i++)
+			hand[i] -= eating[i];
+	}
+
+	public String toString() {
+		return this.id + " " + this.name + "\nHand: "
+				+ Util.toString(this.hand) + ",\nPreference:"
+				+ Util.toString(this.preference);
+	}
+
+	public void update(double happiness) {
+		for (int i = 0; i < eating.length; i++) {
+			if (eating[i] != 0) {
+				preference[i] = happiness / (eating[i] * eating[i]);
+				if (!tasted[i])
+					pile.add(i);
+				tasted[i] = true;
+			}
+		}
+	}
+
+	public int hoardingCount() {
+		int colors = hand.length;
+		return Math.min(colors / 2,
+				(int) Math.ceil(colors / (double) numPlayers));
+	}
+
+	public double computeThreshold(double mean) {
+		int count = hoardingCount();
+		int simulationSize = 100000;
+		double[] points = new double[simulationSize];
+		Random random = new Random();
+		for (int i = 0; i != simulationSize; ++i) {
+			points[i] = random.nextGaussian() + mean;
+			if (points[i] < -1.0 || points[i] > 1.0) i--;
+		}
+		Arrays.sort(points);
+		double perc = 1.0 - count / (double) hand.length;
+		int offset = (int) (perc * simulationSize);
+		if (offset >= points.length)
+			offset = points.length - 1;
+		if (offset < 0)
+			offset = 0;
+		return points[offset];
+	}
+
+	public void recordOffers(Offer[] offers) {
+		currentOffers = offers;
+	}
+
+	public void recordExecuted(Offer[] offers) {
 		for (Offer offer : offers) {
-			int from = offer.getOfferedByIndex();
-			int to = offer.getPickedByIndex();
-//			System.out.println(from + " --> " + to);
-			if (!offer.getOfferLive() && from != to && to >= 0 && to < players) {
-				refineProfile(from, offer.getOffer());
-//				System.out.println("Transfered!");
-				refineProfile(to, offer.getDesire());
-				transferBetweenProfiles(offer);
-			}
+			if (offer.getPickedByIndex() == id)
+				for (int i = 0; i < hand.length; i++)
+					hand[i] += offer.getOffer()[i] - offer.getDesire()[i];
+			pastOffers.add(offers);
 		}
-		/* Update the offer bookkeeping */
-		Offer[] offersThisTurn = new Offer [players];
-		for (Offer o : offers)
-			offersThisTurn[o.getOfferedByIndex()] = copy(o);
-		this.offers.add(offersThisTurn);
-		/* Update the preference arrays */
-		int[][] giveNow = new int [players][colors];
-		int[][] takeNow = new int [players][colors];
-		for (int i = 0 ; i != players ; ++i)
-			for (int j = 0 ; j != colors ; ++j)
-				giveNow[i][j] = takeNow[i][j] = 0;
-		for (Offer o : offers) {
-			int from = o.getOfferedByIndex();
-			int[] offer = o.getOffer();
-			int[] desire = o.getDesire();
-			for (int i = 0 ; i != colors ; ++i) {
-				giveNow[from][i] = offer[i];
-				takeNow[from][i] = desire[i];
+		updateProfiles(offers);
+	}
+
+	public void updateProfiles(Offer[] offers) {
+		if (this.currentTurn > hand.length) { // if everyone has already tasted all skittles
+			endGame = true;
+			for (Offer offer : offers) {
+				if (offer.getOfferedByIndex() != this.id)
+					if (Util.sum(offer.getOffer()) != 0)
+						endGame = false;
 			}
-			int to = o.getPickedByIndex();
-			if (!o.getOfferLive() && to != from && to >= 0 && to < players)
-				for (int i = 0 ; i != colors ; ++i) {
-					giveNow[to][i] += desire[i];
-					takeNow[to][i] += offer[i];
+			// if everyone else proposed an empty offer
+			if (endGame == true)
+				return;
+		}
+
+		for (Offer offer : offers) {
+			int giver = offer.getOfferedByIndex();
+			int[] give = offer.getOffer();
+			int taker = offer.getPickedByIndex();
+			int[] take = offer.getDesire();
+
+			if (taker == -1 && giver == this.id) {
+				ArrayList<Integer> targetProfile = profiles.get(previousTarget);
+				for (int color = 0; color != hand.length; ++color) {
+					if (take[color] != 0)
+						targetProfile.set(color,
+								(int) (take[color] * DECREASING_FACTOR));
 				}
-		}
-		give.add(giveNow);
-		take.add(takeNow);
-//		System.out.println("Profiles by " + myId);
-//		for (int i = 0 ; i != players ; ++i)
-//			System.out.println("Profile " + i + ": " + Arrays.toString(profile[i]) + " " + (i == myId ? "[me]" : ""));
-	}
+			}
 
-	public double[] preferences(int player)
-	{
-		int giveSum[] = new int [colors];
-		int takeSum[] = new int [colors];
-		for (int i = 0 ; i != colors ; ++i)
-			giveSum[i] = takeSum[i] = 0;
-		int turns = give.size();
-		for (int turn = 0 ; turn != turns ; ++turn) {
-			int[] giveNow = give.get(turn)[player];
-			int[] takeNow = take.get(turn)[player];
-			for (int i = 0 ; i != colors ; ++i) {
-				giveSum[i] += giveNow[i];
-				takeSum[i] += takeNow[i];
+			if (taker != -1) {
+				if (giver != this.id) {
+					ArrayList<Integer> giverProfile = profiles.get(giver);
+					for (int color = 0; color != hand.length; ++color) {
+						int v = giverProfile.get(color) + take[color]
+								- give[color];
+						giverProfile.set(color, v);
+
+					}
+				}
+				if (taker != this.id) {
+					ArrayList<Integer> takerProfile = profiles.get(taker);
+					for (int color = 0; color != hand.length; ++color) {
+						int v = takerProfile.get(color) - take[color]
+								+ give[color];
+						takerProfile.set(color, v);
+					}
+				}
+			} else if (giver != this.id) {
+				// taker == -1 i.e. proposed but not executed offer
+				// and it's not my offer
+				ArrayList<Integer> giverProfile = profiles.get(giver);
+				for (int color = 0; color != hand.length; ++color) {
+					if (giverProfile.get(color) < give[color]) // he can still
+																// supply more
+																// than his
+																// profile
+						giverProfile.set(color, give[color]); // update his
+																// profile
+				}
 			}
 		}
-		double[] pref = new double [colors];
-		double giveMax = turns > 0 ? (double) max(giveSum) : 1.0;
-		double takeMax = turns > 0 ? (double) max(takeSum) : 1.0;
-		for (int i = 0 ; i != colors ; ++i)
-			pref[i] = giveSum[i] / giveMax - takeSum[i] / takeMax;
-//		System.out.println("Preferences of " + player + ": " + Arrays.toString(pref));
-		return pref;
-	}
 
-	public static int[] rank(int[] value)
-	{
-		double[] dvalue = new double [value.length];
-		for (int i = 0 ; i != value.length ; ++i)
-			dvalue[i] = value[i];
-		return rank(dvalue);
-	}
-
-	public static int[] rank(double[] value){
-		int[] index = index(value);
-		int[] rank = new int [index.length];
-
-		for (int i = 0 ; i != index.length ; ++i)
-			rank[index[i]] = i;
-		return rank;
-	}
-	public static int[] index(double[] value)
-	{
-		int colors = value.length;
-		int[] index = new int [colors];
-		for (int i = 0 ; i != colors ; ++i)
-			index[i] = i;
-		for (int i = 0 ; i != colors ; ++i) {
-			int max = i;
-			for (int j = i + 1 ; j != colors ; ++j)
-				if (value[index[j]] > value[index[max]])
-					max = j;
-			swap(index, max, i);
-		}
-		return index;
-	}
-
-	public boolean canTrade(int[] wanted, int player)
-	{
-		int unknown = 0;
-		int[] hand = profile[player];
-		for (int i = 0 ; i != colors ; ++i)
-			if (wanted[i] > hand[i])
-				unknown += wanted[i] - hand[i];
-		return unknown <= profile[player][colors];
-	}
-
-	public Offer getOffer(int turn, int player)
-	{
-		Offer offer = offers.get(turn)[player];
-		return offer == null ? null : copy(offer);
-	}
-
-	public int[] hand()
-	{
-		return copy(profile[myId], colors);
-	}
-
-	public int[] profile(int player)
-	{
-		return copy(profile[player], colors);
-	}
-
-	public void updateEaten(int color, int howMany, double happyChange)
-	{
-		/* Update your hand */
-		profile[myId][color] -= howMany;
-		/* Update tastes array */
-		if (!tasted[color]) {
-			/* If negative it is linear */
-			if (happyChange < 0.0)
-				taste[color] = happyChange / howMany;
-			/* If positive it is squared */
-			else
-				taste[color] = happyChange / (howMany * howMany);
-			tasted[color] = true;
-		}
-//		System.out.print("Taste: [" + (!tasted[0] ? "?" : taste[0]));
-//		for (int i = 1 ; i != colors ; ++i)
-//			System.out.print(", " + (!tasted[i] ? "?" : taste[i]));
-//		System.out.println("]");
-	}
-
-	public int turns()
-	{
-		return offers.size();
-	}
-
-	public boolean tasted(int color)
-	{
-		return tasted[color];
-	}
-
-	public double taste(int color)
-	{
-		if(color < 0) return 0;
-		return !tasted[color] ? 0.0 : taste[color];
-	}
-
-	/* Helper function */
-
-	/* Update the profile by offer */
-	private void refineProfile(int id, int[] vector)
-	{
-//		System.out.println("Profile: " + Arrays.toString(profile[id]));
-//		System.out.println("Vector: " + Arrays.toString(vector));
-		for (int i = 0 ; i != colors ; ++i)
-			if (vector[i] > profile[id][i]) {
-				profile[id][colors] -= vector[i] - profile[id][i];
-				profile[id][i] = vector[i];
-			}
-//		System.out.println("Profile: " + Arrays.toString(profile[id]));
-	}
-
-	/* Tranfer skittles */
-	private void transferBetweenProfiles(Offer offer)
-	{
-		int from = offer.getOfferedByIndex();
-		int[] offered = offer.getOffer();
-		int to = offer.getPickedByIndex();
-		int[] desire = offer.getDesire();
-		for (int i = 0 ; i != colors ; ++i) {
-			profile[from][i] += desire[i] - offered[i];
-			profile[to][i] += offered[i] - desire[i];
+		System.out.println("Profiles:");
+		for (int id = 0; id != this.numPlayers; ++id) {
+			if (id == this.id)
+				continue;
+			ArrayList<Integer> profile = profiles.get(id);
+			System.out.println("Player #" + id + ": " + profile);
 		}
 	}
 
-	/* Get the max value */
-	private static int max(int ... v)
-	{
-		int max = 0;
-		for (int i = 1 ; i != v.length ; ++i)
-			if (v[i] > v[max])
-				max  = i;
-		return v[max];
-	}
-
-	/* Sum of a list of integers */
-	public static int sum(int ... v)
-	{
-		int sum = 0;
-		for (int i = 0 ; i != v.length ; ++i)
-			sum += v[i];
-		return sum;
-	}
-
-	/* Copy the offer and override who sent */
-	private static class CopyOffer extends Offer {
-
-		public CopyOffer(int from, int colors)
-		{
-			super(from, colors);
+	public double evaluate(int[] offer, int[] desire, boolean usingProfile) {
+		double value = 0;
+		for (int i = 0; i < hand.length; i++) {
+			double tmp = (usingProfile ? hand[i] : 0) + offer[i] - desire[i];
+			if (tmp < 0) // invalid offer (gives negative something)
+				return -1;
+			else if (tasted[i])
+				tmp *= tmp;
+			value += tmp * preference[i];
 		}
-
-		public void setPickedByIndex(int id)
-		{
-			super.setPickedByIndex(id);
-		}
+		return value;
 	}
 
-	/* Copy the offer object */
-	private static Offer copy(Offer offer)
-	{
-		int colors = offer.getOffer().length;
-		CopyOffer copy = new CopyOffer(offer.getOfferedByIndex(), colors);
-		copy.setOffer(copy(offer.getOffer()), copy(offer.getDesire()));
-		copy.setPickedByIndex(offer.getPickedByIndex());
-		return copy;
-	}
-
-	/* Copy a part array */
-	private static int[] copy(int[] arr, int len)
-	{
-		return Arrays.copyOf(arr, len);
-	}
-
-	/* Copy the whole array */
-	public static int[] copy(int[] arr)
-	{
-		return Arrays.copyOf(arr, arr.length);
-	}
-
-	/* Swap elements of array */
-	private static void swap(int[] a, int i, int j)
-	{
-		int t = a[i];
-		a[i] = a[j];
-		a[j] = t;
+	public void recordPicked(Offer offer) {
+		// we got an offer picked.
+		int[] taking = offer.getDesire();
+		int[] giving = offer.getOffer();
+		for (int i = 0; i < hand.length; i++)
+			hand[i] += taking[i] - giving[i];
 	}
 }

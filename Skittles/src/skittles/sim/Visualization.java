@@ -10,7 +10,7 @@ import java.util.Random;
 
 import javax.swing.JFrame;
 
-import skittles.g3.Info;
+import skittles.g3_alpha.Info;
 
 import com.googlecode.charts4j.AxisLabels;
 import com.googlecode.charts4j.AxisLabelsFactory;

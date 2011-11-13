@@ -1,4 +1,4 @@
-package skittles.g3_2;
+package skittles.g3;
 
 public class Test {
 	public static void main(String[] args){
